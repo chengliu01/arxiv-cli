@@ -1,7 +1,21 @@
 [package]
-name = "arxiv"
-version = "0.1.0"
+name = "arxiv-cli"
+version = "0.1.1"
 edition = "2024"
+description = "CLI for searching arXiv, listing latest papers, downloading PDFs/source, and managing a local paper library"
+readme = "README.md"
+license = "MIT"
+repository = "https://github.com/chengliu01/arxiv-cli"
+keywords = ["arxiv", "cli", "papers", "research"]
+
+[package.metadata.npm]
+name = "arxiv-cli"
+prefix = "arxiv-cli-"
+bins = ["arxiv"]
+mode = "create"
+
+[package.metadata.npm.custom]
+publishConfig = { access = "public" }
 
 [dependencies]
 anyhow = "1.0.102"
@@ -28,3 +42,12 @@ assert_cmd = "2.2.0"
 predicates = "3.1.4"
 tempfile = "3.27.0"
 wiremock = "0.6.5"
+
+[[bin]]
+name = "arxiv"
+path = "src/main.rs"
+
+[profile.release]
+strip = true
+lto = true
+opt-level = "z"

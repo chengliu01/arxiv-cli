@@ -1,0 +1,133 @@
+name: npm-publish
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+concurrency:
+  group: npm-publish-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        run: |
+          rustup toolchain install stable --profile minimal
+          rustup default stable
+
+      - name: Run tests
+        run: cargo test --locked
+
+  build-binaries:
+    name: Build ${{ matrix.target }}
+    needs: test
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-13
+            target: x86_64-apple-darwin
+            binary_name: arxiv
+          - runner: macos-14
+            target: aarch64-apple-darwin
+            binary_name: arxiv
+          - runner: ubuntu-24.04
+            target: x86_64-unknown-linux-gnu
+            binary_name: arxiv
+          - runner: windows-2022
+            target: x86_64-pc-windows-msvc
+            binary_name: arxiv.exe
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        run: |
+          rustup toolchain install stable --profile minimal
+          rustup default stable
+          rustup target add "${{ matrix.target }}"
+
+      - name: Build release binary
+        run: cargo build --locked --release --target "${{ matrix.target }}"
+
+      - name: Stage artifact
+        run: |
+          mkdir -p "dist/${{ matrix.target }}/release"
+          cp "target/${{ matrix.target }}/release/${{ matrix.binary_name }}" \
+             "dist/${{ matrix.target }}/release/${{ matrix.binary_name }}"
+
+      - name: Upload binary artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: binary-${{ matrix.target }}
+          path: dist/${{ matrix.target }}
+          if-no-files-found: error
+
+  publish-npm:
+    name: Generate and Publish npm Packages
+    needs: build-binaries
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+
+      - name: Install Rust toolchain
+        run: |
+          rustup toolchain install stable --profile minimal
+          rustup default stable
+
+      - name: Install cargo-npm
+        run: cargo install --locked cargo-npm
+
+      - name: Download compiled binaries
+        uses: actions/download-artifact@v4
+        with:
+          pattern: binary-*
+          merge-multiple: true
+          path: target
+
+      - name: Show downloaded target tree
+        run: find target -maxdepth 4 -type f | sort
+
+      - name: Generate npm packages
+        run: cargo npm generate --clean --infer-targets
+
+      - name: Show generated npm packages
+        run: find npm -maxdepth 3 -type f | sort
+
+      - name: Publish to npm with bootstrap token
+        if: ${{ secrets.NPM_TOKEN != '' }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: cargo npm publish -- --access public --provenance
+
+      - name: Publish to npm with trusted publishing
+        if: ${{ secrets.NPM_TOKEN == '' }}
+        run: cargo npm publish -- --access public --provenance
