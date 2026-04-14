@@ -12,6 +12,12 @@ cd arxiv-cli
 cargo install --path .
 ```
 
+or install it from npm:
+
+```bash
+npm install -g arxiv-cli
+```
+
 Verify the install:
 
 ```bash
