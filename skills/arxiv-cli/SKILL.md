@@ -3,7 +3,7 @@ name: arxiv-cli
 description: Use when an agent needs to operate the arxiv CLI as a user tool: searching papers, listing latest category papers, showing metadata, downloading PDF or source, managing the local library, or configuring default paths. This skill is organized as an overview plus per-command reference files so the agent can load only the relevant command docs and output semantics.
 ---
 
-# arxiv CLI
+# arxiv-cli
 
 Use this skill when the task is about using the installed `arxiv` command, choosing the right subcommand, explaining flags, or interpreting command output.
 

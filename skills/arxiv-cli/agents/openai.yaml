@@ -1,6 +1,6 @@
 interface:
-  display_name: "arxiv CLI Usage"
-  short_description: "Guide for using arxiv search, latest, download, and library commands"
+  display_name: "arxiv-cli"
+  short_description: "Use the arxiv CLI to search, inspect, download, and manage papers"
   default_prompt: "Use $arxiv-cli to choose and run the right arxiv CLI commands for a paper search or download task."
 
 policy:

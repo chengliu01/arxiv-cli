@@ -2,3 +2,8 @@
 
 .npmignore
 npm/
+
+.openclaw-assets/
+
+skills/arxiv-cli/.assetid
+skills/arxiv-cli/.metadata.json
