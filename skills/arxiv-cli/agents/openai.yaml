@@ -1,0 +1,7 @@
+interface:
+  display_name: "arxiv CLI Usage"
+  short_description: "Guide for using arxiv search, latest, download, and library commands"
+  default_prompt: "Use $arxiv-cli to choose and run the right arxiv CLI commands for a paper search or download task."
+
+policy:
+  allow_implicit_invocation: true
