@@ -7,6 +7,12 @@ description: Use when an agent needs to operate the arxiv CLI as a user tool: se
 
 Use this skill when the task is about using the installed `arxiv` command, choosing the right subcommand, explaining flags, or interpreting command output.
 
+## arxiv-cli installation
+
+```bash
+npm install -g arxiv-cli
+```
+
 ## How to use this skill
 
 Read this file first, then load only the relevant reference files from `references/`.
